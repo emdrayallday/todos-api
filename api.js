@@ -5,6 +5,7 @@ const search = require('./lib/to-do-search')
 const reqFieldChecker = require('./lib/check-req-fields')
 const objClean = require('./lib/clean-object')
 const HTTPError = require('node-http-error')
+const {get} = require('./dal')
 
 const {
   append,
@@ -80,14 +81,14 @@ app.post('/todos', (req, res, next) => {
 })
 
 app.get('/todos/:id', (req, res, next) => {
-  const foundToDo = find(todo => todo.id == req.params.id, todos)
-
-  if (foundToDo) {
-    res.send(foundToDo)
-  } else {
-    next(new HTTPError(404, 'Todo Not Found'))
-  }
-  return
+  get(req.params.id, function (err, data){
+    if (err) {
+      next(new HTTPError(err.status, err.message, err))
+      return
+    }
+    res.send(data)
+    return
+  })
 })
 
 // UPDATE GOES HERE
